@@ -1,6 +1,9 @@
 
 
 # Run econ-753-project.R first
+library('sf')
+
+# Load shapefile
 
 
 library(tidycensus)
@@ -11,6 +14,10 @@ library(dplyr)
 
 
 setwd("/Users/emilypisano/Documents/JJ Grad School/Economics for New York/Group Project")
+
+temp <- st_read( "shape files/columbia_cul_2004_nyc_subborough.shp")
+
+
 
 
 
@@ -24,14 +31,17 @@ occupied_households_sv <- occupied_households %>%
 
 
 
+
+
+
 occupied_households_sv <- occupied_households_sv %>%
   mutate(
     geo.join.id = case_when(
-      (Borough == "3") ~ "36041", # 3 manhattan in hvs, 1 in acs
-      (Borough == "1") ~ "36042", # 1 bronx in hvs, 2 is bronx in acs
-      (Borough == "2") ~ "36043", # 2 brooklyn in hvs, 3 in acs 
-      (Borough == "5") ~ "36045", # 5 staten island in hvs
-      (Borough == "4") ~ "36044"  # 4 queens in hvs
+      (Borough == "3") ~ "3", # 3 manhattan in hvs, 1 in acs
+      (Borough == "1") ~ "1", # 1 bronx in hvs, 2 is bronx in acs
+      (Borough == "2") ~ "2", # 2 brooklyn in hvs, 3 in acs 
+      (Borough == "5") ~ "5", # 5 staten island in hvs
+      (Borough == "4") ~ "4"  # 4 queens in hvs
     )
   )
 
@@ -60,39 +70,13 @@ occupied_households_sv <- occupied_households_sv %>%
       TRUE ~ NA_character_
     )
   )
-    
-
-occupied_households_sv <- occupied_households_sv %>%   
-  mutate(
-    geo.join.id = as.character(geo.join.id),
-    geo.join.id = case_when(
-      geo.join.id %in% c("3604203","3604206") ~ "3604263",
-      geo.join.id %in% c("3604201","3604202") ~ "3604221",
-      geo.join.id %in% c("3604101","3604102") ~ "3604121",
-      geo.join.id %in% c("3604105","3604106") ~ "3604165",
-      TRUE ~ geo.join.id 
-    ))
 
 occupied_households_sv <- occupied_households_sv %>%
   mutate(geo.join.id = as.numeric(geo.join.id))
 
-# need to combine with geospatial
-
-
-geo_id <- aq_acs %>%
-  select("Geo.Join.ID","Geo.Place.Name","name","geometry", "pct_children","total_population","med_hh_income","pop_under_18") %>%
-  distinct() %>%
-  mutate(Geo.Join.ID = as.numeric(Geo.Join.ID))
-
-
-
 occupied_households_sv <- occupied_households_sv %>%
-  left_join(geo_id, by = c("geo.join.id" = "Geo.Join.ID"))
+  left_join(temp, by = c("geo.join.id" = "bor_subb"))
 
-
-
-
-# convert relevant columns to numeric
 
 occupied_households_sv[1:117] <- lapply(occupied_households_sv[1:117], as.numeric)
 
