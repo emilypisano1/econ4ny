@@ -10,7 +10,7 @@ library(tidyverse)
 library(urbnthemes)
 library(ggplot2)
 library(RColorBrewer)
-
+library(scales)
 
 setwd("/Users/emilypisano/Documents/JJ Grad School/Economics for New York/Group Project")
 
@@ -98,11 +98,16 @@ ozone_map <- ggplot(aq_17_mapping) +
 
 # Demographic Data 
 
+pop_under_18 <- aq_17_mapping %>%
+  group_by(geometry) %>%
+  summarise(pop = median(data.pop_under_18))
 
-pct_under_18_map <- ggplot(aq_17_mapping) +
-  geom_sf(aes(fill = `data.pop_under_18`)) + 
+
+
+pop_under_18_map <- ggplot(pop_under_18) +
+  geom_sf(aes(fill = `pop`)) + 
   scale_size_continuous(range = c(1, 10)) +
-  labs(title = "Percent Under 18", fill = "Percent") +
+  labs(title = "Population Under 18", fill = "Count", labels = label_comma()) +
   theme(
     axis.text = element_blank(),    # Remove axis text (lat/long)
     axis.ticks = element_blank(),   # Remove axis ticks
@@ -110,12 +115,22 @@ pct_under_18_map <- ggplot(aq_17_mapping) +
     panel.grid = element_blank(),   # Remove gridlines
     panel.background = element_blank()# Remove axis titles
   ) + 
-  scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+  scale_fill_viridis_c(option = "D", 
+                       direction = -1, 
+                       na.value = 'transparent'
+                       )
+          
 
-med_hh_inc_map <- ggplot(aq_17_mapping) +
-  geom_sf(aes(fill = `data.med_hh_income`)) + 
+
+med_hh_inc <- aq_17_mapping %>%
+  group_by(geometry) %>%
+  summarise(median_hh_income = median(data.med_hh_income))
+
+
+med_hh_inc_map <- ggplot(med_hh_inc) +
+  geom_sf(aes(fill = `median_hh_income`)) + 
   scale_size_continuous(range = c(1, 10)) +
-  labs(title = "Median Household Income", fill = "Percent") +
+  labs(title = "Median Household Income", fill = "$ Amount") +
   theme(
     axis.text = element_blank(),    # Remove axis text (lat/long)
     axis.ticks = element_blank(),   # Remove axis ticks
@@ -123,10 +138,15 @@ med_hh_inc_map <- ggplot(aq_17_mapping) +
     panel.grid = element_blank(),   # Remove gridlines
     panel.background = element_blank()# Remove axis titles
   ) + 
-  scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+  scale_fill_viridis_c(option = "D", na.value = 'transparent', labels = label_comma())
 
-tot_pop_map <- ggplot(aq_17_mapping) +
-  geom_sf(aes(fill = `data.total_population`)) + 
+tot_pop <- aq_17_mapping %>%
+  group_by(geometry) %>%
+  summarise(pop = median(data.total_population))
+
+
+tot_pop_map <- ggplot(tot_pop) +
+  geom_sf(aes(fill = `pop`)) + 
   scale_size_continuous(range = c(1, 10)) +
   labs(title = "Total Population", fill = "Count") +
   theme(
@@ -142,59 +162,81 @@ tot_pop_map <- ggplot(aq_17_mapping) +
 
 # Mapping Health Effects
 
-# asthma_child_map <- ggplot(asthma) +
-#   geom_sf(aes(fill = `data.data.Asthma emergency department visits due to PM2.5_per 100,000 children`)) + 
-#   scale_size_continuous(range = c(1, 10)) +
-#   labs(title = "Heatmap of Asthma emergency visits", fill = "Visits Per 100,000 children") +
-#   theme(
-#     axis.text = element_blank(),    # Remove axis text (lat/long)
-#     axis.ticks = element_blank(),   # Remove axis ticks
-#     axis.title = element_blank(),
-#     panel.grid = element_blank(),   # Remove gridlines
-#     panel.background = element_blank()# Remove axis titles
-#   ) + 
-#   scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
-
-
-# resp_map <- ggplot(aq_health) +
-#   geom_sf(aes(fill = `data.Respiratory hospitalizations due to PM2.5 (age 20+)_per 100,000 adults`)) + 
-#   scale_size_continuous(range = c(1, 10)) +
-#   labs(title = "Heatmap of Respiratory hospitalizations due to PM2.5", fill = "Visits per 100,000 adults") +
-#   theme(
-#     axis.text = element_blank(),    # Remove axis text (lat/long)
-#     axis.ticks = element_blank(),   # Remove axis ticks
-#     axis.title = element_blank(),
-#     panel.grid = element_blank(),   # Remove gridlines
-#     panel.background = element_blank()# Remove axis titles
-#   ) + 
-#   scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+# asthma_children <- aq_17_mapping %>%
+#   group_by(geometry) %>%
+#   summarise(ratio = median(`data.Asthma emergency department visits due to PM2.5_per 100,000 children`))
 # 
-# cardiac_map <- ggplot(aq_health) +
-#   geom_sf(aes(fill = `data.Cardiovascular hospitalizations due to PM2.5 (age 40+)_per 100,000 adults`)) + 
-#   scale_size_continuous(range = c(1, 10)) +
-#   labs(title = "Heatmap of Cardiovascular hospitalizations due to PM2.5", fill = "Visits per 100,000 adults") +
-#   theme(
-#     axis.text = element_blank(),    # Remove axis text (lat/long)
-#     axis.ticks = element_blank(),   # Remove axis ticks
-#     axis.title = element_blank(),
-#     panel.grid = element_blank(),   # Remove gridlines
-#     panel.background = element_blank()# Remove axis titles
-#   ) + 
-#   scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+#  asthma_child_map <- ggplot(aq_17_mapping) +
+#    geom_sf(aes(fill = `ratio`)) +
+#    scale_size_continuous(range = c(1, 10)) +
+#    labs(title = "Heatmap of Asthma emergency visits", fill = "Visits Per 100,000 children") +
+#    theme(
+#      axis.text = element_blank(),    # Remove axis text (lat/long)
+#      axis.ticks = element_blank(),   # Remove axis ticks
+#      axis.title = element_blank(),
+#      panel.grid = element_blank(),   # Remove gridlines
+#      panel.background = element_blank()# Remove axis titles
+#    ) +
+#    scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
 # 
+# resp_adults <- aq_17_mapping %>%
+#    group_by(geometry) %>%
+#    summarise(ratio = median(`data.Respiratory hospitalizations due to PM2.5 (age 20+)_per 100,000 adults`))
+#  
+#  
+#  
+#  resp_map <- ggplot(aq_17_mapping) +
+#    geom_sf(aes(fill = `resp_adults`)) +
+#    scale_size_continuous(range = c(1, 10)) +
+#    labs(title = "Heatmap of Respiratory hospitalizations due to PM2.5", fill = "Visits per 100,000 adults") +
+#    theme(
+#      axis.text = element_blank(),    # Remove axis text (lat/long)
+#      axis.ticks = element_blank(),   # Remove axis ticks
+#      axis.title = element_blank(),
+#      panel.grid = element_blank(),   # Remove gridlines
+#      panel.background = element_blank()# Remove axis titles
+#    ) +
+#    scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
 # 
-# deaths_map <- ggplot(aq_health) +
-#   geom_sf(aes(fill = `data.Deaths due to PM2.5_per 100,000 adults`)) + 
-#   scale_size_continuous(range = c(1, 10)) +
-#   labs(title = "Heatmap of Deaths due to PM2.5", fill = "Deaths per 100,000 adults") +
-#   theme(
-#     axis.text = element_blank(),    # Remove axis text (lat/long)
-#     axis.ticks = element_blank(),   # Remove axis ticks
-#     axis.title = element_blank(),
-#     panel.grid = element_blank(),   # Remove gridlines
-#     panel.background = element_blank()# Remove axis titles
-#   ) + 
-#   scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+#  card_adults <- aq_17_mapping %>%
+#    group_by(geometry) %>%
+#    summarise(ratio = median(`data.Cardiovascular hospitalizations due to PM2.5 (age 40+)_per 100,000 adults`))
+#  
+#  
+#  
+#  
+#  cardiac_map <- ggplot(aq_17_mapping) +
+#    geom_sf(aes(fill = `card_adults`)) +
+#    scale_size_continuous(range = c(1, 10)) +
+#    labs(title = "Heatmap of Cardiovascular hospitalizations due to PM2.5", fill = "Visits per 100,000 adults") +
+#    theme(
+#      axis.text = element_blank(),    # Remove axis text (lat/long)
+#      axis.ticks = element_blank(),   # Remove axis ticks
+#      axis.title = element_blank(),
+#      panel.grid = element_blank(),   # Remove gridlines
+#      panel.background = element_blank()# Remove axis titles
+#    ) +
+#    scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+# 
+#  card_adults <- aq_17_mapping %>%
+#    group_by(geometry) %>%
+#    summarise(ratio = median(`data.Cardiovascular hospitalizations due to PM2.5 (age 40+)_per 100,000 adults`))
+#  
+#  
+#  
+# 
+#  deaths_map <- ggplot(aq_17_mapping) +
+#    geom_sf(aes(fill = `data.Deaths due to PM2.5_per 100,000 adults`)) +
+#    scale_size_continuous(range = c(1, 10)) +
+#    labs(title = "Heatmap of Deaths due to PM2.5", fill = "Deaths per 100,000 adults") +
+#    theme(
+#      axis.text = element_blank(),    # Remove axis text (lat/long)
+#      axis.ticks = element_blank(),   # Remove axis ticks
+#      axis.title = element_blank(),
+#      panel.grid = element_blank(),   # Remove gridlines
+#      panel.background = element_blank()# Remove axis titles
+#    ) +
+#    scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
 
 
 
@@ -204,6 +246,35 @@ tot_pop_map <- ggplot(aq_17_mapping) +
 # From HVS
 
 ## Health Variables
+
+bad_health <- occupied_households_sv %>%
+  group_by(geometry) %>%
+  summarise(
+    ratio = sum(
+      case_when(
+        data.General.Health..respondent %in% c(4,5) ~ data.Final.household.weight,
+        TRUE ~ 0  # Set other cases to 0
+      )
+    ) / sum(
+      case_when(
+        data.Mental.health %in% c(1,2,3,4,5,6) ~ data.Final.household.weight,
+        TRUE ~ 0  # Set other cases to 0
+      )
+    ))
+
+
+bad_health_map <- ggplot(bad_health) +
+  geom_sf(aes(fill = `ratio`)) +  
+  labs(title = "Ratio of population in fair or poor health", fill = "Ratio") +
+  theme(
+    axis.text = element_blank(),    # Remove axis text (lat/long)
+    axis.ticks = element_blank(),   # Remove axis ticks
+    axis.title = element_blank(),
+    panel.grid = element_blank(),   # Remove gridlines
+    panel.background = element_blank()# Remove axis titles
+  ) + 
+  scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+
 
 mental_health_ratio <- occupied_households_sv %>%
   group_by(geometry) %>%
@@ -512,4 +583,245 @@ heating_breakdown_ratio <- occupied_households_sv %>%
         TRUE ~ 0  # Set other cases to 0
       )
     ) / sum(
-      ca
+      case_when(
+        data.Number.of.heating.breakdowns %in% c(2,3,4,5,9,8) ~ data.Final.household.weight,
+        TRUE ~ 0  # Set other cases to 0
+      )
+    ))
+
+heating_breakdown_map<- ggplot(heating_breakdown_ratio) +
+  geom_sf(aes(fill = `ratio`)) +  
+  labs(title = "Heatmap of Heating Breakdown", fill = "Ratio of Heating Breakdown") +
+  theme(
+    axis.text = element_blank(),    # Remove axis text (lat/long)
+    axis.ticks = element_blank(),   # Remove axis ticks
+    axis.title = element_blank(),
+    panel.grid = element_blank(),   # Remove gridlines
+    panel.background = element_blank()# Remove axis titles
+  ) + 
+  scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+
+
+underreported_breakdowns <- ggplot(heating_breakdown_ratio) +
+  geom_sf(aes(fill = `no.obs`)) +  
+  labs(title = "Heatmap of Under-Reporting, Heating Breakdown", fill = "Ratio of Buildings with No-Record") +
+  theme(
+    axis.text = element_blank(),    # Remove axis text (lat/long)
+    axis.ticks = element_blank(),   # Remove axis ticks
+    axis.title = element_blank(),
+    panel.grid = element_blank(),   # Remove gridlines
+    panel.background = element_blank()# Remove axis titles
+  ) + 
+  scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+
+
+#  [84] "Functioning.Air.Conditioning" 
+
+
+air_condition_ratio <- occupied_households_sv %>%
+  group_by(geometry) %>%
+  summarise(
+    ratio = sum(
+      case_when(
+        data.Functioning.Air.Conditioning %in% c(1,2) ~ data.Final.household.weight,
+        TRUE ~ 0  # Set other cases to 0
+      )
+    ) / sum(
+      case_when(
+        data.Functioning.Air.Conditioning %in% c(1,2,3) ~ data.Final.household.weight,
+        TRUE ~ 0  # Set other cases to 0
+      )
+    ),
+    no.obs = sum(
+      case_when(
+        data.Functioning.Air.Conditioning %in% c(4,8) ~ data.Final.household.weight,
+        TRUE ~ 0  # Set other cases to 0
+      )
+    ) / sum(
+      case_when(
+        data.Functioning.Air.Conditioning %in% c(1,2,3,4,8) ~ data.Final.household.weight,
+        TRUE ~ 0  # Set other cases to 0
+      )
+    ))
+
+air_conditioning_map <- ggplot(air_condition_ratio) +
+  geom_sf(aes(fill = `ratio`)) +  
+  labs(title = "Heatmap of Functioning Air Condition", fill = "Ratio") +
+  theme(
+    axis.text = element_blank(),    # Remove axis text (lat/long)
+    axis.ticks = element_blank(),   # Remove axis ticks
+    axis.title = element_blank(),
+    panel.grid = element_blank(),   # Remove gridlines
+    panel.background = element_blank()# Remove axis titles
+  ) + 
+  scale_fill_viridis_c(option = "D", direction = 1, na.value = 'transparent')
+
+
+
+
+# Density - Persons Per Room
+
+
+density_map <- ggplot(occupied_households_sv) +
+  geom_sf(aes(fill = `data.Persons.per.room`)) +  
+  labs(title = "Heatmap of Persons per Room", fill = "Ratio ") +
+  theme(
+    axis.text = element_blank(),    # Remove axis text (lat/long)
+    axis.ticks = element_blank(),   # Remove axis ticks
+    axis.title = element_blank(),
+    panel.grid = element_blank(),   # Remove gridlines
+    panel.background = element_blank()# Remove axis titles
+  ) + 
+  scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+
+
+# Economic 
+
+
+# rental_assistance_ratio <- occupied_households_sv %>%
+#   group_by(geometry) %>%
+#   summarise(
+#     rental.assistance.ratio = (sum(
+#       case_when(
+#         data.Rental.assistance.flag %in% c(1) ~ data.Final.household.weight,
+#         TRUE ~ 0
+#       ),
+#       na.rm = TRUE
+#     )) / (sum(
+#       case_when(
+#         data.Rental.assistance.flag %in% c(1, 2) ~ data.Final.household.weight,
+#         TRUE ~ 0
+#       ),
+#       na.rm = TRUE
+#     )
+#   )
+#   )
+# 
+# rental_assistance_map <- ggplot(rental_assistance_ratio) +
+#   geom_sf(aes(fill = `rental.assistance.ratio`)) +  
+#   labs(title = "Heatmap of Rental Assistance", fill = "Ratio") +
+#   theme(
+#     axis.text = element_blank(),    # Remove axis text (lat/long)
+#     axis.ticks = element_blank(),   # Remove axis ticks
+#     axis.title = element_blank(),
+#     panel.grid = element_blank(),   # Remove gridlines
+#     panel.background = element_blank()# Remove axis titles
+#   ) + 
+#   scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+
+
+section_8_ratio <- occupied_households_sv %>%
+  group_by(geometry) %>%
+  summarise(
+    section.8.ratio = sum(
+      case_when(
+        data.Federal.section.8 %in% c(1) ~ data.Final.household.weight,
+        TRUE ~ 0
+      ),
+      na.rm = TRUE
+    ) / sum(
+      case_when(
+        data.Federal.section.8 %in% c(1, 2) ~ data.Final.household.weight,
+        TRUE ~ 0
+      ),
+      na.rm = TRUE
+    ),
+    owner = sum(
+      case_when(
+        data.Federal.section.8 %in% c(3) ~ data.Final.household.weight,
+        TRUE ~ 0
+      ),
+      na.rm = TRUE
+    ) / sum(
+      case_when(
+        data.Federal.section.8 %in% c(1, 2, 3) ~ data.Final.household.weight,
+        TRUE ~ 0
+      ),
+      na.rm = TRUE
+    )
+  )
+
+section_8_map <- ggplot(section_8_ratio) +
+  geom_sf(aes(fill = `section.8.ratio`)) +  
+  labs(title = "Heatmap of Federal Section 8 Housing", fill = "Ratio of Section 8") +
+  theme(
+    axis.text = element_blank(),    # Remove axis text (lat/long)
+    axis.ticks = element_blank(),   # Remove axis ticks
+    axis.title = element_blank(),
+    panel.grid = element_blank(),   # Remove gridlines
+    panel.background = element_blank()# Remove axis titles
+  ) + 
+  scale_fill_viridis_c(option = "D", direction = -1, na.value = 'transparent')
+
+
+# Save all maps
+
+
+getwd()
+directory_path <- "/Users/emilypisano/Documents/JJ Grad School/Economics for New York/Group Project/" # Change for your directory
+png(file = paste0(directory_path, "pm2.5_map.png"))
+print(pm2.5_map)
+dev.off()
+png(file = paste0(directory_path, "no2_map.png"))
+print(no2_map)
+dev.off()
+png(file = paste0(directory_path, "ozone_map.png"))
+print(ozone_map)
+dev.off()
+png(file = paste0(directory_path, "pop_under_18_map.png"))
+print(pop_under_18_map)
+dev.off()
+png(file = paste0(directory_path, "med_hh_inc_map.png"))
+print(med_hh_inc_map)
+dev.off()
+png(file = paste0(directory_path, "tot_pop_map.png"))
+print(tot_pop_map)
+dev.off()
+png(file = paste0(directory_path, "mental_health_map.png"))
+print(mental_health_map)
+dev.off()
+png(file = paste0(directory_path, "mental_health_no_obs_map.png"))
+print(mental_health_no_obs_map)
+dev.off()
+png(file = paste0(directory_path, "poor_building_condition_map.png"))
+print(poor_building_condition_map)
+dev.off()
+png(file = paste0(directory_path, "maintenance_map.png"))
+print(maintenance_map)
+dev.off()
+png(file = paste0(directory_path, "bad_maintenance_map.png"))
+print(bad_maintenance_map)
+dev.off()
+png(file = paste0(directory_path, "broken_windows_map.png"))
+print(broken_windows_map)
+dev.off()
+png(file = paste0(directory_path, "additional_heating_map.png"))
+print(additional_heating_map)
+dev.off()
+png(file = paste0(directory_path, "underreported_heating_map.png"))
+print(underreported_heating_map)
+dev.off()
+png(file = paste0(directory_path, "heating_breakdown_map.png"))
+print(heating_breakdown_map)
+dev.off()
+png(file = paste0(directory_path, "air_conditioning_map.png"))
+print(air_conditioning_map)
+dev.off()
+png(file = paste0(directory_path, "density_map.png"))
+print(density_map)
+dev.off()
+png(file = paste0(directory_path, "rental_assistance_map.png"))
+print(rental_assistance_map)
+dev.off()
+png(file = paste0(directory_path, "section_8_map.png"))
+print(section_8_map)
+dev.off()
+png(file = paste0(directory_path, "bad_health.png"))
+print(bad_health_map)
+dev.off()
+
+
+
+
+
+

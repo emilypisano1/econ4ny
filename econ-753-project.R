@@ -95,7 +95,7 @@ get_census_data <- function() {
     variables = c("B01003_001"),
     geography = "puma",
     state = "New York", 
-    year = 2022, 
+    year = 2017, 
     survey = "acs5",
     geometry = TRUE
   ) %>% 

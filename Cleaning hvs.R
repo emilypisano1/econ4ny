@@ -101,4 +101,13 @@ column_classes <- sapply(occupied_households_sv, class)
 
 
 
-occupied_households_sv <- st_sf(geometry = st_sfc(occupied_households_sv$geometry), data = occupied_househo
+occupied_households_sv <- st_sf(geometry = st_sfc(occupied_households_sv$geometry), data = occupied_households_sv)
+
+
+
+
+
+
+
+
+
